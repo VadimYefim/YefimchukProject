@@ -1,0 +1,4 @@
+div.content-wrapper-root {
+  display: flex;
+  justify-content: space-between;
+}
