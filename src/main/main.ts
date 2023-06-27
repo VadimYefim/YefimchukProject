@@ -9,7 +9,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, BrowserView } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -80,6 +80,25 @@ const createWindow = async () => {
         : path.join(__dirname, '../../.erb/dll/preload.js'),
     },
   });
+
+  //BrowserView ////////////////////////////////////////////////////////////////////////
+  const view = new BrowserView();
+
+  mainWindow.setBrowserView(view);
+
+  view.setBounds({ x: 624, y: 100, width: 400, height: 400 });
+  view.setAutoResize({
+    horizontal: true,
+    vertical: true,
+    width: true,
+    height: true,
+  });
+  view.webContents.loadURL('https://electronjs.org');
+
+  ipcMain.on('inputDataUrl', async (_event, data) => {
+    view.webContents.loadURL(data || 'https://electronjs.org');
+  });
+  //BrowserView ////////////////////////////////////////////////////////////////////////
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
