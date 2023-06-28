@@ -14,7 +14,7 @@ const SiteContent = () => {
   return (
     <>
       <input type="text" value={inputValue} onChange={handleInputChange} />
-      <button onClick={sendDataToMainProcess}>Send Data</button>
+      <button onClick={sendDataToMainProcess}>Open Site</button>
     </>
   );
 };

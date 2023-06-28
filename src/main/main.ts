@@ -9,7 +9,14 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain, BrowserView } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  shell,
+  ipcMain,
+  BrowserView,
+  Menu,
+} from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
@@ -72,9 +79,10 @@ const createWindow = async () => {
   mainWindow = new BrowserWindow({
     show: false,
     width: 1024,
-    height: 728,
+    height: 724,
     icon: getAssetPath('icon.png'),
     webPreferences: {
+      devTools: false,
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
@@ -86,7 +94,7 @@ const createWindow = async () => {
 
   mainWindow.setBrowserView(view);
 
-  view.setBounds({ x: 624, y: 100, width: 400, height: 400 });
+  view.setBounds({ x: 624, y: 100, width: 400, height: 500 });
   view.setAutoResize({
     horizontal: true,
     vertical: true,
@@ -98,6 +106,24 @@ const createWindow = async () => {
   ipcMain.on('inputDataUrl', async (_event, data) => {
     view.webContents.loadURL(data || 'https://electronjs.org');
   });
+
+  view.webContents.on('context-menu', (_, props) => {
+    const { x, y } = props;
+
+    Menu.buildFromTemplate([
+      {
+        label: 'Save selected text',
+        click: () => {
+          console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', props);
+          mainWindow?.webContents.send('dataUpdated', {
+            pageURL: props?.pageURL,
+            selectionText: props?.selectionText,
+          });
+        },
+      },
+    ]).popup({ window: mainWindow });
+  });
+
   //BrowserView ////////////////////////////////////////////////////////////////////////
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
